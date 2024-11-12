@@ -1,0 +1,66 @@
+import os
+
+# Define the categories and subcategories again (can be imported from previous code)
+categories = {
+    "Programming": ["Python", "Java", "C"],
+    "AI": ["Machine_Learning", "Neural_Networks"],
+    "Math": ["Linear_Algebra", "Calculus"],
+    "Database": ["SQL", "NoSQL"],
+    "Security": ["Cryptography", "Network_Security"],
+    "Others": []
+}
+
+# Function to calculate correctness and accuracy
+def calculate_correctness_and_accuracy(root_folder):
+    total_files = 0
+    correct_files = 0
+    incorrectly_categorized = 0
+
+    # Iterate through all files in the root folder
+    for file in os.listdir(root_folder):
+        if file.endswith(".pdf"):
+            total_files += 1
+            file_path = os.path.join(root_folder, file)
+            categorized_correctly = False
+
+            # Check each category and subcategory
+            for category, subcategories in categories.items():
+                for subcategory in subcategories:
+                    if subcategory.lower() in file.lower():  # Check for subcategory keyword in filename
+                        dest_folder = os.path.join(root_folder, category, subcategory)
+                        if os.path.exists(dest_folder):
+                            # Check if file is in the right folder
+                            if file in os.listdir(dest_folder):
+                                categorized_correctly = True
+                                correct_files += 1
+                            break
+
+                if categorized_correctly:
+                    break
+            
+            # If the file is in "Others" folder, check if it was correctly placed there
+            if not categorized_correctly:
+                others_folder = os.path.join(root_folder, "Others")
+                if file in os.listdir(others_folder):
+                    correct_files += 1  # Correctly categorized in 'Others'
+                else:
+                    incorrectly_categorized += 1  # Incorrectly placed
+
+    if total_files > 0:
+        correctness_score = (correct_files / total_files) * 100
+        accuracy = (correct_files / total_files) * 100
+    else:
+        correctness_score = 0
+        accuracy = 0
+
+    # Print out the results
+    print(f"Total files processed: {total_files}")
+    print(f"Correctly categorized: {correct_files}")
+    print(f"Incorrectly categorized: {incorrectly_categorized}")
+    print(f"Correctness Score: {correctness_score:.2f}%")
+    print(f"Accuracy: {accuracy:.2f}%")
+
+
+root_folder = input("Enter the path to the root folder: ")
+# Run the function to check correctness and accuracy
+calculate_correctness_and_accuracy(root_folder)
