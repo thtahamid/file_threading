@@ -1,0 +1,4 @@
+# create sample files
+
+
+touch python1.pdf python2.pdf machinelearning1.pdf machineleaning2.pdf linearalgebra1.pdf linearalgebra2,pdf sql1.pdf sql2.pdf cryptography1.pdf cryptography2.pdf other1.pdf other2.pdf
