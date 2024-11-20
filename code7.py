@@ -3,13 +3,40 @@ import PyPDF2
 
 def create_folder_structure(root_folder):
     categories = {
-        "Programming": ["programming", "code", "developer", "python", "java", "c++", "javascript"],
-        "AI": ["machine learning", "AI", "artificial intelligence", "deep learning", "data science"],
-        "Math": ["algebra", "calculus", "statistics", "probability", "geometry", "mathematics"],
-        "Database": ["database", "SQL", "NoSQL", "data storage", "big data"],
-        "Security": ["cryptography", "security", "network security", "cybersecurity", "encryption"],
-        "Others": []
-    }
+    "Programming": [
+        "programming", "code", "developer", "python", "java", "c++", "javascript", "coding",
+        "software engineering", "backend", "frontend", "full stack", "ruby", "go", "typescript",
+        "php", "swift", "kotlin", "development"
+    ],
+    "AI": [
+        "machine learning", "AI", "artificial intelligence", "deep learning", "data science",
+        "neural networks", "nlp", "natural language processing", "computer vision",
+        "reinforcement learning", "supervised learning", "unsupervised learning", "AI ethics",
+        "predictive modeling", "generative models", "AI tools"
+    ],
+    "Math": [
+        "algebra", "calculus", "statistics", "probability", "geometry", "mathematics",
+        "linear algebra", "differential equations", "discrete mathematics", "number theory",
+        "trigonometry", "graph theory", "combinatorics", "math modeling"
+    ],
+    "Database": [
+        "database", "SQL", "NoSQL", "data storage", "big data", "data engineering",
+        "database management", "relational databases", "postgresql", "mysql", "mongodb",
+        "oracle", "dynamodb", "database design", "data warehouses", "etl", "schemas",
+        "database optimization"
+    ],
+    "Security": [
+        "cryptography", "security", "network security", "cybersecurity", "encryption",
+        "penetration testing", "firewalls", "ethical hacking", "vulnerability assessment",
+        "security protocols", "zero trust", "incident response", "forensics",
+        "malware analysis", "phishing", "DDoS", "ransomware", "secure coding", "infosec"
+    ],
+    "Others": [
+        "general topics", "miscellaneous", "varied interests", "random ideas",
+        "general knowledge"
+    ]
+}
+
 
     # Create directories for each main category if they don't exist
     for category in categories.keys():
