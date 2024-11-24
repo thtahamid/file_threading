@@ -17,12 +17,16 @@ def create_folder_structure(root_folder, categories):
 
 def analyze_file(file_path):
     """
-    Extract the text content of the first page of a PDF file.
+    Extract the text content of the first two pages of a PDF file.
     """
     try:
         with open(file_path, "rb") as f:
             pdf_reader = PyPDF2.PdfReader(f)
-            if pdf_reader.pages:
+            if len(pdf_reader.pages) >= 2:
+                text = pdf_reader.pages[0].extract_text().lower()
+                text += pdf_reader.pages[1].extract_text().lower()
+                return text
+            elif len(pdf_reader.pages) == 1:
                 return pdf_reader.pages[0].extract_text().lower()
     except Exception as e:
         print(f"Error reading file '{file_path}': {e}")
