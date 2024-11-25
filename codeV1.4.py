@@ -303,7 +303,7 @@ if __name__ == "__main__":
     all_moved = check_root_folder(root_folder)
     total_files = sum(sum(counts.values()) if isinstance(counts, dict) else counts 
                      for counts in file_mover.file_counts.values())
-    
+    time_taken = time.time() - start_time
     # User validation
     validate = input("\nWould you like to validate the correctness of file categorization? (y/n): ").lower()
     if validate == 'y':
@@ -333,6 +333,6 @@ if __name__ == "__main__":
     
     print("\nExecution Summary:")
     print("-" * 30)
-    print(f"Time taken  : {time.time() - start_time:.2f} seconds")
+    print(f"Time taken to Categorize all files : {time_taken:.2f} seconds")
     print(f"Final status: {'✓ Success' if all_moved else '✗ Failed - files remain in root'}")
     print("="*50)
