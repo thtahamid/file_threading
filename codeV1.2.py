@@ -10,8 +10,10 @@ class ThreadSafeFileMover:
         self.file_lock = threading.Lock()
         self.counts_lock = threading.Lock()
         self.processed_files_lock = threading.Lock()
+        self.moves_lock = threading.Lock()
         self.file_counts = {}
         self.processed_files = set()
+        self.moves = []
         
     def is_processed(self, file_name):
         with self.processed_files_lock:
@@ -31,6 +33,10 @@ class ThreadSafeFileMover:
                 self.file_counts[main_cat][sub_cat] += 1
             else:
                 self.file_counts[main_cat] += 1
+
+    def record_move(self, file_name, destination):
+        with self.moves_lock:
+            self.moves.append((file_name, destination))
 
 def create_folder_structure(root_folder):
     # Define the multilevel folder structure
@@ -118,20 +124,19 @@ def categorize_and_move_files(root_folder, categories, file_mover):
                                 file_mover.move_file(file_path, destination_path)
                                 file_mover.update_counts(main_category, best_sub_cat)
                                 file_mover.mark_processed(file_name)
-                                print(f"Thread {main_category}: Moved {file_name} -> {main_category}/{best_sub_cat}")
+                                file_mover.record_move(file_name, f"{main_category}/{best_sub_cat}")
                             except FileNotFoundError:
                                 pass
                     
                     elif main_category == "Others" and os.path.exists(file_path):
-                        # Only move to Others if no other category claimed it
-                        if not any(file_mover.is_processed(file_name) for _ in range(100)):  # Small delay to check
+                        if not any(file_mover.is_processed(file_name) for _ in range(100)):
                             destination_folder = os.path.join(root_folder, "Others")
                             destination_path = os.path.join(destination_folder, file_name)
                             try:
                                 file_mover.move_file(file_path, destination_path)
                                 file_mover.update_counts("Others")
                                 file_mover.mark_processed(file_name)
-                                print(f"Thread Others: Moved {file_name} -> Others")
+                                file_mover.record_move(file_name, "Others")
                             except FileNotFoundError:
                                 pass
 
@@ -232,6 +237,10 @@ if __name__ == "__main__":
     others_thread.start()
     others_thread.join()
     
+    print("\nFile Movements:")
+    for file_name, destination in sorted(file_mover.moves):
+        print(f"Moved {file_name} -> {destination}")
+    
     # Check if any files remain in root folder
     all_moved = check_root_folder(root_folder)
     
@@ -239,6 +248,7 @@ if __name__ == "__main__":
     total_files = sum(sum(counts.values()) if isinstance(counts, dict) else counts 
                      for counts in file_mover.file_counts.values())
     
+    print("\nAnalysis Report:")
     generate_analysis_report(file_mover.file_counts, total_files)
     print(f"\nTime taken: {time.time() - start_time:.2f} seconds")
     print(f"Status: {'Success' if all_moved else 'Failed - some files remain in root'}")
