@@ -145,7 +145,13 @@ def categorize_and_move_files(root_folder, categories, file_mover):
                                 file_mover.move_file(file_path, destination_path)
                                 file_mover.update_counts(main_category, best_sub_cat)
                                 file_mover.mark_processed(file_name)
-                                print(f"Thread {main_category}: Moved {file_name} -> {main_category}/{best_sub_cat}")
+                                # Store moves for later display instead of printing immediately
+                                with file_mover.processed_files_lock:
+                                    if not hasattr(file_mover, 'moves_log'):
+                                        file_mover.moves_log = []
+                                    file_mover.moves_log.append(
+                                        f"{file_name:30} → {main_category}/{best_sub_cat}"
+                                    )
                             except FileNotFoundError:
                                 pass
                     
@@ -158,7 +164,13 @@ def categorize_and_move_files(root_folder, categories, file_mover):
                                 file_mover.move_file(file_path, destination_path)
                                 file_mover.update_counts("Others")
                                 file_mover.mark_processed(file_name)
-                                print(f"Thread Others: Moved {file_name} -> Others")
+                                # Store moves for later display instead of printing immediately
+                                with file_mover.processed_files_lock:
+                                    if not hasattr(file_mover, 'moves_log'):
+                                        file_mover.moves_log = []
+                                    file_mover.moves_log.append(
+                                        f"{file_name:30} → Others"
+                                    )
                             except FileNotFoundError:
                                 pass
 
@@ -185,7 +197,10 @@ def categorize_and_move_files(root_folder, categories, file_mover):
 
 
 def generate_analysis_report(file_counts, total_files):
-    print(f"Total files found in root folder: {total_files}\n")
+    print("\n" + "="*50)
+    print("               ANALYSIS REPORT")
+    print("="*50)
+    print(f"\nTotal files processed: {total_files}")
     
     total_moved = 0
     percentages = {}
@@ -195,54 +210,54 @@ def generate_analysis_report(file_counts, total_files):
             total = sum(sub_counts.values())
             total_moved += total
             if total > 0:
-                percentages[main_cat] = total  # Store total for percentage calculation
+                percentages[main_cat] = total
 
     # Calculate and print percentages for each major folder
+    print("\nDistribution by Category:")
+    print("-" * 30)
     if total_files > 0:
         for main_cat, moved_count in percentages.items():
             percentage_moved = (moved_count / total_files) * 100
-            print(f"{main_cat}: {percentage_moved:.2f}% ")
+            print(f"{main_cat:15} : {percentage_moved:6.2f}% ({moved_count} files)")
     else:
         print("No files found to process.")
 
     # Calculate overall percentages
     if total_moved > 0:
-        percentage_correct = (total_moved / total_moved) * 100  # This will always be 100%
+        percentage_correct = (total_moved / total_moved) * 100
     else:
         percentage_correct = 0
 
-    print(f"\nCorrectness: {percentage_correct:.2f}%")
+    print("\nOverall Statistics:")
+    print("-" * 30)
+    print(f"Total files moved   : {total_moved}")
+    print(f"Processing accuracy : {percentage_correct:.2f}%")
 
 
 def check_root_folder(root_folder):
     remaining_files = [f for f in os.listdir(root_folder) if f.endswith('.pdf')]
     if remaining_files:
-        print("\nWARNING: Files still in root folder:")
+        print("\nUnprocessed Files:")
+        print("-" * 30)
         for file in remaining_files:
-            print(f"- {file}")
+            print(f"• {file}")
         return False
     return True
 
 # Main Execution
 if __name__ == "__main__":
-    root_folder = input("Enter the path to the root folder: ").strip()
+    print("\n" + "="*50)
+    print("          PDF FILE CATEGORIZATION")
+    print("="*50)
     
-    # First create folder structure and get categories
+    root_folder = input("\nEnter the path to the root folder: ").strip()
+    
+    # Create folder structure and get categories
+    print("\nInitializing folder structure...")
     categories = create_folder_structure(root_folder)
     
-    # Then get custom paths for categories
-    print("\nEnter custom paths for each category (press Enter to use default):")
-    custom_paths = {}
-    for main_cat, subcats in categories.items():
-        if isinstance(subcats, dict):
-            for subcat in subcats:
-                custom_path = input(f"{main_cat}/{subcat}: ").strip()
-                if custom_path:
-                    custom_paths[f"{main_cat}/{subcat}"] = custom_path
-
     start_time = time.time()
-    
-    print("\nStarting file categorization with threads...")
+    print("\nStarting file categorization...")
     
     # Initialize thread-safe file mover
     file_mover = ThreadSafeFileMover()
@@ -278,7 +293,7 @@ if __name__ == "__main__":
     total_files = sum(sum(counts.values()) if isinstance(counts, dict) else counts 
                      for counts in file_mover.file_counts.values())
     
-    # After processing is complete, ask about correctness validation
+    # After checking root folder and before the movement log
     validate = input("\nWould you like to validate the correctness of file categorization? (y/n): ").lower()
     
     if validate == 'y':
@@ -293,9 +308,21 @@ if __name__ == "__main__":
             validator.add_correct_path(filename, correct_path)
         
         accuracy = validator.calculate_accuracy(file_mover.file_locations)
-        print(f"\nAccuracy of categorization: {accuracy:.2f}%")
+        print(f"\nUser Validation Accuracy: {accuracy:.2f}%")
     
-    # Generate the regular analysis report
+    # Continue with movement log and analysis report
+    print("\n" + "="*50)
+    print("            MOVEMENT LOG")
+    print("="*50)
+    if hasattr(file_mover, 'moves_log'):
+        for move in file_mover.moves_log:
+            print(move)
+    
+    # Generate the analysis report
     generate_analysis_report(file_mover.file_counts, total_files)
-    print(f"\nTime taken: {time.time() - start_time:.2f} seconds")
-    print(f"Status: {'Success' if all_moved else 'Failed - some files remain in root'}")
+    
+    print("\nExecution Summary:")
+    print("-" * 30)
+    print(f"Time taken  : {time.time() - start_time:.2f} seconds")
+    print(f"Final status: {'✓ Success' if all_moved else '✗ Failed - files remain in root'}")
+    print("="*50)
