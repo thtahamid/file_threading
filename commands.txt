@@ -1,4 +1,8 @@
 # create sample files
 
 
-touch python1.pdf python2.pdf machinelearning1.pdf machineleaning2.pdf linearalgebra1.pdf linearalgebra2,pdf sql1.pdf sql2.pdf cryptography1.pdf cryptography2.pdf other1.pdf other2.pdf
+# pip install PyPDF2 or pip3 install PyPDF2
+
+
+#   python3 -m venv myvenv
+#    source myvenv/bin/activate
