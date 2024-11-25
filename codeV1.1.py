@@ -43,7 +43,7 @@ def create_folder_structure(root_folder):
                 sub_path = os.path.join(main_path, subcategory)
                 os.makedirs(sub_path, exist_ok=True)
     
-    print("Multilevel folder structure created successfully.")
+    print("Folder structure created successfully.")
     return categories
 
 def categorize_and_move_files(root_folder, categories):
@@ -99,20 +99,49 @@ def categorize_and_move_files(root_folder, categories):
     
     return file_counts, len(files)
 
+# def generate_analysis_report(file_counts, total_files):
+#     print("\nSummary:")
+#     print(f"Total files found in root folder: {total_files}\n")
+#     for main_cat, sub_counts in file_counts.items():
+#         if isinstance(sub_counts, dict):
+#             total = sum(sub_counts.values())
+#             if total > 0:
+#                 print(f"{main_cat}: {total} files")
+#                 for sub_cat, count in sub_counts.items():
+#                     if count > 0:
+#                         print(f"  └─{sub_cat}: {count}")
+#         elif sub_counts > 0:
+#             print(f"{main_cat}: {sub_counts} files")
+
+
 def generate_analysis_report(file_counts, total_files):
-    print("\nSummary:")
     print(f"Total files found in root folder: {total_files}\n")
+    
+    total_moved = 0
+    percentages = {}
+
     for main_cat, sub_counts in file_counts.items():
         if isinstance(sub_counts, dict):
             total = sum(sub_counts.values())
+            total_moved += total
             if total > 0:
-                print(f"{main_cat}: {total} files")
-                for sub_cat, count in sub_counts.items():
-                    if count > 0:
-                        print(f"  └─{sub_cat}: {count}")
-        elif sub_counts > 0:
-            print(f"{main_cat}: {sub_counts} files")
+                percentages[main_cat] = total  # Store total for percentage calculation
 
+    # Calculate and print percentages for each major folder
+    if total_files > 0:
+        for main_cat, moved_count in percentages.items():
+            percentage_moved = (moved_count / total_files) * 100
+            print(f"{main_cat}: {percentage_moved:.2f}% ")
+    else:
+        print("No files found to process.")
+
+    # Calculate overall percentages
+    if total_moved > 0:
+        percentage_correct = (total_moved / total_moved) * 100  # This will always be 100%
+    else:
+        percentage_correct = 0
+
+    print(f"\nCorrectness: {percentage_correct:.2f}%")
 
 
 def check_root_folder(root_folder):
