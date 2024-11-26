@@ -243,7 +243,7 @@ def generate_analysis_report(file_counts, total_files):
 
     print("\nOverall Statistics:")
     print("-" * 30)
-    print(f"Total files moved   : {total_moved}")
+    #print(f"Total files moved   : {total_moved}")
     print(f"Processing accuracy : {percentage_correct:.2f}%")
 
 def check_root_folder(root_folder):
